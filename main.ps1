@@ -11,7 +11,6 @@ param(
     $alpha = $pixel | select -ExpandProperty A
 
     ($red + $green + $blue) / 3
-
 }
 
 function Change-Image-Size {
@@ -19,10 +18,33 @@ param (
     [System.Drawing.Bitmap]$Bitmap
 )
 
-    $screenWidth = (Get-WmiObject -Class Win32_DesktopMonitor).ScreenWidth
-    $imageWidth = $Bitmap.Width
+    #$screenWidth = $Host.UI.RawUI.WindowSize.Width
+    $consolenWidth = 211
+     
+    [int]$imageWidth = [int]$Bitmap.Size.Width
+
+    [int]$consoleHeight = 50
+    if ($imageWidth -gt $consolenWidth) {
+        $consoleHeight = [math]::Round(($consolenWidth  / $Bitmap.Size.Width) * $Bitmap.Size.Height)
+         
+    }
+
+    $imageWidth
+    $consolenWidth
+
+    $imageHeight
+    $consoleHeight
 
     if ($screenWidth -lt $imageWidth) {
+        $newBitMap = New-Object System.Drawing.Bitmap($consoleWidth,$consoleHeight)
+
+        $widthStep = [math]::Round($imageWidth / $consolenWidth)
+        $heightStep = [math]::Round($imageHeight / $consoleHeight)
+        
+        foreach ($i in (1..($consolenWidth ))) {
+            
+        }
+    
         write-host "to do"
     } else {
         $Bitmap
@@ -70,7 +92,11 @@ param (
 #$image.loadfile("$pwd\$filePath")
 
 
-$BitMap = [System.Drawing.Bitmap]::FromFile((Get-Item "$pwd\marika.jpg").FullName)
+$BitMap = [System.Drawing.Bitmap]::FromFile((Get-Item "$pwd\obama.png").FullName)
+
+$BitMap.Size.Width
+
+Change-Image-Size -Bitmap $BitMap
 
 #(Get-Item "$pwd\$filePath").FullName
 
@@ -84,7 +110,5 @@ $BitMap = [System.Drawing.Bitmap]::FromFile((Get-Item "$pwd\marika.jpg").FullNam
 #Get-Average-Value-Of-Pixel -pixel $pixel
 
 
-Draw-Result -baseBitmap $BitMap
-
-
-#$pixel.name
+#Draw-Result -baseBitmap $BitMap
+ 
