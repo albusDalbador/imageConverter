@@ -1,4 +1,5 @@
-
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing.Bitmap")
 
 #functions 
 function Get-Average-Value-Of-Pixel {
@@ -13,102 +14,81 @@ param(
     ($red + $green + $blue) / 3
 }
 
-function Change-Image-Size {
-param (
-    [System.Drawing.Bitmap]$Bitmap
+
+function Compress-Height {
+param(
+    [System.Drawing.Bitmap]$sourceBitmap
 )
 
-    #$screenWidth = $Host.UI.RawUI.WindowSize.Width
-    $consolenWidth = 211
-     
-    [int]$imageWidth = [int]$Bitmap.Size.Width
+    [System.Drawing.Bitmap]$stepBitmap = [System.Drawing.Bitmap](New-Object System.Drawing.Bitmap($sourceBitmap.Size.Width ,[int]($sourceBitmap.Size.Height/2)))
 
-    [int]$consoleHeight = 50
-    if ($imageWidth -gt $consolenWidth) {
-        $consoleHeight = [math]::Round(($consolenWidth  / $Bitmap.Size.Width) * $Bitmap.Size.Height)
-         
-    }
-
-    $imageWidth
-    $consolenWidth
-
-    $imageHeight
-    $consoleHeight
-
-    if ($screenWidth -lt $imageWidth) {
-        $newBitMap = New-Object System.Drawing.Bitmap($consoleWidth,$consoleHeight)
-
-        $widthStep = [math]::Round($imageWidth / $consolenWidth)
-        $heightStep = [math]::Round($imageHeight / $consoleHeight)
-        
-        foreach ($i in (1..($consolenWidth ))) {
-            
+    foreach ($y in (1..($sourceBitmap.Size.Height/2 -1 ))){
+        foreach ($x in (1..($sourceBitmap.Size.Width - 1))){
+            $stepBitmap.SetPixel($x,$y,$sourceBitmap.GetPixel($x,$y*2))
         }
-    
-        write-host "to do"
-    } else {
-        $Bitmap
     }
+
+    $stepBitmap
 }
 
 
 function Draw-Result {
 param (
-    [System.Drawing.Bitmap]$baseBitmap
+    [System.Drawing.Bitmap]$newBitmap
 )
 
-    $newBitmap = Change-Image-Size -Bitmap $baseBitmap
-    #[char]([int][math]::Round( (Get-Average-Value-Of-Pixel $newBitmap.GetPixel(1,1)) / 255 * 17 + 32 ))
-
     [string]$resultImage
-    
-    for ($x = 1; $x -lt $newBitmap.Height; $x++) {
-        foreach ($y in (1..($newBitmap.Width -1))) {
 
-            #Write-Host ([math]::Round((Get-Average-Value-Of-Pixel  $newBitmap.GetPixel($y,$x)))) -NoNewline
-            
-            $resultImage += " " + ([char]([int][math]::Round( (Get-Average-Value-Of-Pixel $newBitmap.GetPixel($y,$x)) / 255 * 17 + 32 ))) 
+    for ($x = 1; $x -lt $newBitmap.Size.Height; $x++) {
+        foreach ($y in (1..($newBitmap.Size.Width -1))) {
+
+            #$resultImage += " " + ([char]([int][math]::Round( (Get-Average-Value-Of-Pixel $newBitmap.GetPixel($y,$x)) / 255 * 17 + 32 ))) 
+            Write-Host ([char]([int][math]::Round( (Get-Average-Value-Of-Pixel $newBitmap.GetPixel($y,$x)) / 255 * 17 + 32 )))  -NoNewline
 
         }
-        $resultImage += "`n"
+        Write-Host ""
+        #$resultImage += "`n"
     }
-
-    $resultImage > marika.txt
-
+    #$resultImage > obama.txt
 }
 
 
+function Change-Image-Size {
+param (
+    [System.Drawing.Bitmap]$Bitmap
+)
+    $consoleWidth = 211
 
+    [System.Drawing.Bitmap]$stepBitmap = Compress-Height -sourceBitmap $Bitmap
+     
+    [int]$imageWidth = [int]$stepBitmap.Size.Width
+    [int]$imageHeight = [int]$stepBitmap.Size.Height
 
+    [int]$consoleHeight = $imageHeight
 
+    if ($imageWidth -gt $consolenWidth) {
+        $consoleHeight = [math]::Round(($consoleWidth  / $imageWidth) * $imageHeight)
+        
+        [System.Drawing.Bitmap]$newBitMap = [System.Drawing.Bitmap](New-Object System.Drawing.Bitmap($consoleWidth ,$consoleHeight))
 
+        $widthStep = [math]::floor($imageWidth / $consoleWidth)
+        $heightStep = [math]::floor($imageHeight / $consoleHeight)
+
+        foreach ($i in (1..($consoleHeight - 1))) {
+            foreach ($j in (1 ..($consoleWidth - 1))){ 
+                $newBitMap.SetPixel($j,$i,$stepBitmap.GetPixel($j * $widthStep,$i * $heightStep))
+            }
+        }
+        
+        Draw-Result -newBitmap $newBitMap
+    } else {
+        Draw-Result -newBitmap $Bitmap
+    }
+}
 
 
 #"main"
 
-#$filePath = Read-Host "enter the path to the file from this location: $pwd"
-
-#$image = New-Object -ComObject Wia.ImageFile
-#$image.loadfile("$pwd\$filePath")
-
-
 $BitMap = [System.Drawing.Bitmap]::FromFile((Get-Item "$pwd\obama.png").FullName)
 
-$BitMap.Size.Width
-
 Change-Image-Size -Bitmap $BitMap
-
-#(Get-Item "$pwd\$filePath").FullName
-
-#$image.width
-
-#$pixel = $BitMap.GetPixel(300,1)
-
-#$pixel.GetType()
-
-
-#Get-Average-Value-Of-Pixel -pixel $pixel
-
-
-#Draw-Result -baseBitmap $BitMap
- 
