@@ -7,7 +7,7 @@ Uses symbols with indexes from range [33-49] (ascii)
   <img src=firstExample.png />
 </div>
 
-<div align="center>
+<div align="center">
 ``````````````````````````````````````````````````````````````````````````````````````````
 </div>
 
