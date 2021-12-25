@@ -89,6 +89,6 @@ param (
 
 #"main"
 
-$BitMap = [System.Drawing.Bitmap]::FromFile((Get-Item "$pwd\obama.png").FullName)
+$BitMap = [System.Drawing.Bitmap]::FromFile((Get-Item "$pwd\greyCat.jpg").FullName)
 
 Change-Image-Size -Bitmap $BitMap
